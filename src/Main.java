@@ -14,7 +14,8 @@ public class Main {
         HTMLParseTable mTable = new HTMLParseTable();
         mTable.AddDictionary("data/HP1_1-4.html");
         mTable.AddDictionary("data/HP1_5-8.html");
-        
+        mTable.writeCSV();
+
 
     }
 }

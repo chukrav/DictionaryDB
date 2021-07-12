@@ -3,9 +3,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class HTMLParseTable {
@@ -77,7 +75,7 @@ public class HTMLParseTable {
         System.out.println("Unique words added: " + (ID - ID0));
     }
 
-    public File[] getListOfFiles(String path){
+    public File[] getListOfFiles(String path) {
         //File folder = new File("data/");
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles(new FilenameFilter() {
@@ -89,6 +87,18 @@ public class HTMLParseTable {
         return listOfFiles;
         //if (listOfFiles[i].isFile())
         //listOfFiles[i].isDirectory()
+    }
+
+    public void writeCSV() throws IOException {
+        PrintWriter fd = new PrintWriter(new FileWriter("data/output.csv"));
+        fd.println("ID\tword\ttranslation");
+        for (Map.Entry element:dictionary.entrySet()){
+            String word = (String) element.getKey();
+            String translat = (String) element.getValue();
+            int primKey = primaryKey.get(word);
+            fd.println(primKey+"\t"+word+"\t"+translat);
+        }
+        fd.close();
     }
 
 }
