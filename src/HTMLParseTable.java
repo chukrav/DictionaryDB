@@ -101,4 +101,19 @@ public class HTMLParseTable {
         fd.close();
     }
 
+    public Set<String> getWords() {
+        return words;
+    }
+
+    public HashMap<String, String> getDictionary() {
+        return dictionary;
+    }
+
+    public HashMap<String, Integer> getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public HashMap<String, List<Integer>> getTables() {
+        return tables;
+    }
 }
