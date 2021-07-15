@@ -52,7 +52,8 @@ public class DBDealer {
         }
     }
 
-    public static void createDBTables(){
+    //colTitles = "HP1_1-4 TEXT,HP1_5-8 TEX)"
+    public static void createDBTables(String colTitles){
         String CREATE_DICTIONARY = "CREATE TABLE IF NOT EXISTS dictionary (id INTEGER, word TEXT, translate TEXT)";
         String DROP_DICTIONARY = "DROP TABLE IF EXISTS dictionary";
         String DROP_TABLES_INCLUDE = "DROP TABLE IF EXISTS tablesinc";
@@ -63,6 +64,8 @@ public class DBDealer {
             Statement statement = conn.createStatement();
             statement.execute(DROP_DICTIONARY);  // Drops dictionary !!! ----------->
             statement.execute(CREATE_DICTIONARY);
+            statement.execute(DROP_TABLES_INCLUDE);  // Drops dictionary !!! ----------->
+            statement.execute(CREATE_TABLES_INCLUDE+colTitles);
 
 
         } catch (SQLException e) {
@@ -78,7 +81,7 @@ public class DBDealer {
             outColNames.append(tableName + " TEXT,");
         }
         String outNames = outColNames.toString();
-        outNames = outNames.substring(0,outColNames.length()-2)+")";
+        outNames = outNames.substring(0,outColNames.length()-1)+")";
 
         return outNames;
     }
