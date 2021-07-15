@@ -22,8 +22,8 @@ public class HTMLParseTable {
         dictionary = new HashMap<>();
         primaryKey = new HashMap<>();
         tables = new HashMap<>();
-        ID = 0;
-        ID0 = 0;
+        ID = 1;
+        ID0 = 1;
     }
 
     public void AddDictionary(String filename) throws IOException {

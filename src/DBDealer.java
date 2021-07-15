@@ -1,4 +1,7 @@
 import java.sql.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DBDealer {
 
@@ -47,6 +50,37 @@ public class DBDealer {
         } catch (SQLException e) {
             System.out.println("Something went wrong: " + e.getMessage());
         }
+    }
+
+    public static void createDBTables(){
+        String CREATE_DICTIONARY = "CREATE TABLE IF NOT EXISTS dictionary (id INTEGER, word TEXT, translate TEXT)";
+        String DROP_DICTIONARY = "DROP TABLE IF EXISTS dictionary";
+        String DROP_TABLES_INCLUDE = "DROP TABLE IF EXISTS tablesinc";
+        String CREATE_TABLES_INCLUDE = "CREATE TABLE IF NOT EXISTS tablesinc (id INTEGER, "; // Add tables' names
+
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:data/dictionaryNZ.db");
+            Statement statement = conn.createStatement();
+            statement.execute(DROP_DICTIONARY);  // Drops dictionary !!! ----------->
+            statement.execute(CREATE_DICTIONARY);
+
+
+        } catch (SQLException e) {
+            //e.printStackTrace();
+            System.out.println("Something went wrong: " + e.getMessage());
+        }
+    }
+
+    public static String readColumnNames(HashMap<String, List<Integer>> tables){
+        StringBuffer outColNames = new StringBuffer();
+        for (Map.Entry element:tables.entrySet() ){
+            String tableName = (String) element.getKey();
+            outColNames.append(tableName + " TEXT,");
+        }
+        String outNames = outColNames.toString();
+        outNames = outNames.substring(0,outColNames.length()-2)+")";
+
+        return outNames;
     }
 
 }
