@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.sql.Statement;
 import java.util.*;
 
 public class HTMLParseTable {
@@ -15,6 +16,7 @@ public class HTMLParseTable {
     private int ID;
     private int ID0;
     private int ii = 0;
+    private String strTableNames;
 
     public HTMLParseTable() {
         this.filename = null;
@@ -90,15 +92,79 @@ public class HTMLParseTable {
     }
 
     public void writeCSV() throws IOException {
-        PrintWriter fd = new PrintWriter(new FileWriter("data/output.csv"));
+        PrintWriter fd = new PrintWriter(new FileWriter("data/dictionary.csv"));
         fd.println("ID\tword\ttranslation");
-        for (Map.Entry element:dictionary.entrySet()){
+        for (Map.Entry element : dictionary.entrySet()) {
             String word = (String) element.getKey();
             String translat = (String) element.getValue();
             int primKey = primaryKey.get(word);
-            fd.println(primKey+"\t"+word+"\t"+translat);
+            fd.println(primKey + "\t" + word + "\t" + translat);
         }
         fd.close();
+    }
+
+    public void writeCSVTableStatus() throws IOException {
+        PrintWriter fd = new PrintWriter(new FileWriter("data/tableStatus.csv"));
+        String titles = strTableNames.replaceAll(",","\t");
+        fd.println("id\t"+titles);
+//        String[] arr = strTableNames.split(",");
+//        for (Map.Entry element : tables.entrySet()) {
+//        for (int i=0;i<arr.length;++i){
+//            String word = (String) element.getKey();
+//            String translat = (String) element.getValue();
+//            int primKey = primaryKey.get(word);
+//            fd.println(primKey + "\t" + word + "\t" + translat);
+//        }
+//        fd.close();
+        //System.out.println(strTableNames);
+//        StringBuffer titles = new StringBuffer();
+//        List<String> list = new ArrayList<>();
+//        for (Map.Entry element : tables.entrySet()) {
+//            String title = (String) element.getKey();
+//            titles.append(title+",");
+//            list.add(title);
+//            //System.out.println(title);
+//        }
+
+        int[][] tableStatus = makeRatingTable();
+
+        fd.close();
+
+    }
+
+    //    fillTablesStateTab(Statement statement, String columnTitles, Integer[][] statesTable)
+    public int[][] makeRatingTable() {
+//        "HP1_1_4,HP1_5_8"
+        int colLen = tables.size();
+        colLen++; // id add to array size;
+        int rowsLen = primaryKey.size();
+        int[][] statusTable = new int[rowsLen][colLen];
+        int ii = 0;
+        for (int i = 0; i < rowsLen; ++i) {
+            statusTable[i][ii] = i + 1;
+        }
+        ii++;
+        StringBuffer names = new StringBuffer();
+        List<String> list = new ArrayList<>();
+        for (Map.Entry element : tables.entrySet()) {
+            String key = (String) element.getKey();
+            names.append(key + ",");
+           list.add(key);
+        }
+        for (int i=1;i<list.size();++i){
+            List<Integer> entries = tables.get(list.get(i));
+            for (int j=0;j<entries.size();++j){
+                statusTable[entries.get(j)][i] = 1;
+            }
+        }
+        strTableNames = names.substring(0, names.lastIndexOf(",") );
+        strTableNames = strTableNames.replaceAll("-","_");
+        System.out.println("===: "+strTableNames);
+        return statusTable;
+    }
+
+    public String getStrTableNames() {
+        return strTableNames;
     }
 
     public Set<String> getWords() {

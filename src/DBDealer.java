@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class DBDealer {
 
-    public void makeCRUD(){
+    public void makeCRUD() {
         try {
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:/Volumes/Production/Courses/Programs/JavaPrograms/TestDB/testjava.db");
             Connection conn = DriverManager.getConnection("jdbc:sqlite:data/testjava.db");
@@ -52,12 +52,50 @@ public class DBDealer {
         }
     }
 
+    public static void fillDictionaryTab(Statement statement, HashMap<String, String> dictionary,
+                                         HashMap<String, Integer> primaryKey) throws SQLException {
+        String INSERT_DICT = "INSERT INTO dictionary(id,word,translate) VALUES(";
+        //statement.execute("INSERT INTO contacts(name,phone,email)" +
+        // "VALUES('Tim',1234567,'tim@email.com')");
+        for (Map.Entry element : dictionary.entrySet()) {
+            String word = (String) element.getKey();
+            String translat = (String) element.getValue();
+            translat = translat.replaceAll(",",";");
+            int id = primaryKey.get(word);
+            String insertWord = INSERT_DICT + id + "," + word + "," + translat + ")";
+            statement.execute(insertWord);
+        }
+
+    }
+
+    public static void fillTablesStateTab(Statement statement, String columnTitles, int[][] statesTable)
+            throws SQLException {
+        // In statesTable col-1 = id, columns = [0,1,2] status values.
+//        "INSERT INTO tablesinc(id,HP1_1_4,HP1_5_8) VALUES(";
+        String INSERT_STATETABROW = "INSERT INTO tablesinc(id,";
+
+        for (int i = 0; i < statesTable.length; ++i) {
+            //String insertLine = INSERT_STATETABROW+columnTitles+") VALUES(";
+            StringBuffer insertLine = new StringBuffer(INSERT_STATETABROW + columnTitles + ") VALUES(");
+            for (int j = 0; j < statesTable[i].length; ++j) {
+                insertLine.append(statesTable[i][j] + ",");
+            }
+//            int idx = insertLine.lastIndexOf(",");
+            String line = insertLine.substring(0, insertLine.lastIndexOf(",")) + ")";
+            statement.execute(line);
+        }
+    }
+
     //colTitles = "HP1_1-4 TEXT,HP1_5-8 TEX)"
-    public static void createDBTables(String colTitles){
+    //public static void createDBTables(String colTitles){
+    public static void createDBTables(HTMLParseTable mTable) {
         String CREATE_DICTIONARY = "CREATE TABLE IF NOT EXISTS dictionary (id INTEGER, word TEXT, translate TEXT)";
         String DROP_DICTIONARY = "DROP TABLE IF EXISTS dictionary";
         String DROP_TABLES_INCLUDE = "DROP TABLE IF EXISTS tablesinc";
         String CREATE_TABLES_INCLUDE = "CREATE TABLE IF NOT EXISTS tablesinc (id INTEGER, "; // Add tables' names
+
+        //String colTitles = mTable.getStrTableNames();
+        String colTitles = readColumnNames(mTable.getTables());
 
         try {
             Connection conn = DriverManager.getConnection("jdbc:sqlite:data/dictionaryNZ.db");
@@ -65,7 +103,10 @@ public class DBDealer {
             statement.execute(DROP_DICTIONARY);  // Drops dictionary !!! ----------->
             statement.execute(CREATE_DICTIONARY);
             statement.execute(DROP_TABLES_INCLUDE);  // Drops dictionary !!! ----------->
-            statement.execute(CREATE_TABLES_INCLUDE+colTitles);
+            statement.execute(CREATE_TABLES_INCLUDE + colTitles);
+
+            //fillDictionaryTab(statement,mTable.getDictionary(),mTable.getPrimaryKey());
+            fillTablesStateTab(statement,mTable.getStrTableNames(), mTable.makeRatingTable());
 
 
         } catch (SQLException e) {
@@ -74,14 +115,15 @@ public class DBDealer {
         }
     }
 
-    public static String readColumnNames(HashMap<String, List<Integer>> tables){
+    public static String readColumnNames(HashMap<String, List<Integer>> tables) {
         StringBuffer outColNames = new StringBuffer();
-        for (Map.Entry element:tables.entrySet() ){
+        for (Map.Entry element : tables.entrySet()) {
             String tableName = (String) element.getKey();
-            outColNames.append(tableName + " TEXT,");
+            tableName = tableName.replaceAll("-", "_");
+            outColNames.append(tableName + " INTEGER,");
         }
         String outNames = outColNames.toString();
-        outNames = outNames.substring(0,outColNames.length()-1)+")";
+        outNames = outNames.substring(0, outColNames.length() - 1) + ")";
 
         return outNames;
     }
