@@ -106,7 +106,7 @@ public class DBDealer {
             statement.execute(CREATE_TABLES_INCLUDE + colTitles);
 
             //fillDictionaryTab(statement,mTable.getDictionary(),mTable.getPrimaryKey());
-            fillTablesStateTab(statement,mTable.getStrTableNames(), mTable.makeRatingTable());
+            //fillTablesStateTab(statement,mTable.getStrTableNames(), mTable.makeRatingTable());
 
 
         } catch (SQLException e) {

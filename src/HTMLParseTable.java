@@ -17,6 +17,7 @@ public class HTMLParseTable {
     private int ID0;
     private int ii = 0;
     private String strTableNames;
+    private List<String> tablesNames;
 
     public HTMLParseTable() {
         this.filename = null;
@@ -26,6 +27,7 @@ public class HTMLParseTable {
         tables = new HashMap<>();
         ID = 1;
         ID0 = 1;
+        tablesNames = new ArrayList<>();
     }
 
     public void AddDictionary(String filename) throws IOException {
@@ -35,6 +37,7 @@ public class HTMLParseTable {
         String fileName = input.getName();
         String[] parts = fileName.split("\\.");
         fileName = parts[0];
+        tablesNames.add(fileName);
         if (!tables.containsKey(fileName)) {
             tables.put(fileName, new ArrayList<>());
         }
@@ -58,6 +61,8 @@ public class HTMLParseTable {
                 if (transl != null) {
                     if (words.contains(word)) {
                         String transPrev = dictionary.get(word);
+                        Integer id = primaryKey.get(word);
+                        tables.get(fileName).add(id);
                         if (transPrev.length() < transl.length())
                             dictionary.put(word, transl);
                     } else {
@@ -103,37 +108,24 @@ public class HTMLParseTable {
         fd.close();
     }
 
-    public void writeCSVTableStatus() throws IOException {
+    public void writeCSVTableStatus(int[][] statusTable) throws IOException {
         PrintWriter fd = new PrintWriter(new FileWriter("data/tableStatus.csv"));
-        String titles = strTableNames.replaceAll(",","\t");
-        fd.println("id\t"+titles);
-//        String[] arr = strTableNames.split(",");
-//        for (Map.Entry element : tables.entrySet()) {
-//        for (int i=0;i<arr.length;++i){
-//            String word = (String) element.getKey();
-//            String translat = (String) element.getValue();
-//            int primKey = primaryKey.get(word);
-//            fd.println(primKey + "\t" + word + "\t" + translat);
-//        }
-//        fd.close();
-        //System.out.println(strTableNames);
-//        StringBuffer titles = new StringBuffer();
-//        List<String> list = new ArrayList<>();
-//        for (Map.Entry element : tables.entrySet()) {
-//            String title = (String) element.getKey();
-//            titles.append(title+",");
-//            list.add(title);
-//            //System.out.println(title);
-//        }
-
-        int[][] tableStatus = makeRatingTable();
-
+        //String titles = strTableNames.replaceAll(",","\t");
+        int LEN = statusTable[0].length;
+        fd.println("id," + strTableNames);
+        for (int i = 0; i < statusTable.length; ++i) {
+            StringBuilder line = new StringBuilder();
+            for (int j = 0; j < LEN; ++j) {
+                line = line.append(statusTable[i][j] + ",");
+            }
+            String outLine = line.substring(0, line.lastIndexOf(","));
+            fd.println(outLine);
+        }
         fd.close();
-
-    }
+     }
 
     //    fillTablesStateTab(Statement statement, String columnTitles, Integer[][] statesTable)
-    public int[][] makeRatingTable() {
+    public int[][] makeRatingTable() throws IOException {
 //        "HP1_1_4,HP1_5_8"
         int colLen = tables.size();
         colLen++; // id add to array size;
@@ -146,20 +138,27 @@ public class HTMLParseTable {
         ii++;
         StringBuffer names = new StringBuffer();
         List<String> list = new ArrayList<>();
-        for (Map.Entry element : tables.entrySet()) {
-            String key = (String) element.getKey();
-            names.append(key + ",");
-           list.add(key);
-        }
-        for (int i=1;i<list.size();++i){
-            List<Integer> entries = tables.get(list.get(i));
-            for (int j=0;j<entries.size();++j){
-                statusTable[entries.get(j)][i] = 1;
+//        for (Map.Entry element : tables.entrySet()) {
+//            String key = (String) element.getKey();
+//            names.append(key + ",");
+//            list.add(key);
+//        }
+        try {
+            for (int i = 0; i < tablesNames.size(); ++i) {
+                String mTableName = tablesNames.get(i);
+                List<Integer> entries = tables.get(mTableName);
+                names.append(mTableName + ",");
+                for (int j = 0; j < entries.size(); ++j) {
+                    statusTable[entries.get(j)-1][i+1] = 1;
+                }
             }
+        } catch (Exception e){
+            System.out.println("Something went wrong: " + e.getMessage());
         }
-        strTableNames = names.substring(0, names.lastIndexOf(",") );
-        strTableNames = strTableNames.replaceAll("-","_");
-        System.out.println("===: "+strTableNames);
+        strTableNames = names.substring(0, names.lastIndexOf(","));
+        strTableNames = strTableNames.replaceAll("-", "_");
+        System.out.println("===: " + strTableNames);
+        writeCSVTableStatus(statusTable);
         return statusTable;
     }
 
